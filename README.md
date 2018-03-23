@@ -32,16 +32,13 @@ Understanding JSON Web Tokens
 
 ### Structure of a JWT
 
-JSON Web Token example:
+There are 3 parts to a JWT separated by a ".", each section is created differently. We have the 3 parts which are:
 
-	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ0b3B0YWwuY29tI iwiZXhwIjoxNDI2NDIwODAwLCJodHRwOi8vdG9wdGFsLmNvbS9qd3RfY2xhaW1zL2lzX2FkbWluI jp0cnVlLCJjb21wYW55IjoiVG9wdGFsIiwiYXdlc29tZSI6dHJ1ZX0.yRQYnWzskCZUxPwaQupWk iUzKELZ49eM7oWxAQK_ZXw
+* *header*
+* *payload*
+* *signature*
 
-Since there are 3 parts separated by a ., each section is created differently. We have the 3 parts which are:
-
-* header
-* payload
-* signature
-<base64-encoded header>.<base64-encoded payload>.<base64-encoded signature>
+	"<base64-encoded header>.<base64-encoded payload>.<base64-encoded signature>"
 
 #### Header
 
@@ -51,9 +48,10 @@ The JWT Header declares that the encoded object is a JSON Web Token (JWT) and th
     “alg”: “HS256”,
     “typ”: “JWT”
 }
-"alg" is a string and specifies the algorithm used to sign the token.
 
-"typ" is a string for the token, defaulted to "JWT". Specifies that this is a JWT token.
+* *"alg"* is a string and specifies the algorithm used to sign the token.
+
+* *"typ"* is a string for the token, defaulted to "JWT". Specifies that this is a JWT token.
 
 #### Payload (Claims)
 
@@ -61,21 +59,21 @@ A claim or a payload can be defined as a statement about an entity that contians
 
 Following are the claim attributes :
 
-iss: The issuer of the token
+* *iss*: The issuer of the token
 
-sub: The subject of the token
+* *sub*: The subject of the token
 
-aud: The audience of the token
+* *aud*: The audience of the token
 
-qsh: query string hash
+* *qsh*: query string hash
 
-exp: Token expiration time defined in Unix time
+* *exp*: Token expiration time defined in Unix time
 
-nbf: “Not before” time that identifies the time before which the JWT must not be accepted for processing
+* *nbf*: “Not before” time that identifies the time before which the JWT must not be accepted for processing
 
-iat: “Issued at” time, in Unix time, at which the token was issued
+* *iat*: “Issued at” time, in Unix time, at which the token was issued
 
-jti: JWT ID claim provides a unique identifier for the JWT
+* *jti*: JWT ID claim provides a unique identifier for the JWT
 
 #### Signature
 
@@ -89,7 +87,21 @@ Encoding a payload
 
 	$ import jwt
 	$ encoded = jwt.encode({'some': 'payload'}, 'secret', algorithm='HS256')
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzb21lIjoicGF5bG9hZCJ9.4twFt5NiznN84AWoo1d7KO1T_yoc0Z6XOpOVswacPZg'
+    $ encoded
+    $ 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzb21lIjoicGF5bG9hZCJ9.4twFt5NiznN84AWoo1d7KO1T_yoc0Z6XOpOVswacPZg'
+
+If you run the above encode function, you will notice that it always returns the same token.  This seems odd right? Shouldn't our tokens be unique?  The problem is we have only given it static data at this point where 'secret' is the key.  Since the payload and the key are always the same, the generated JWT is also always the same.  But this just an example, not how we would actually implement using JSON web tokens in practice.
+
+For us to use the JWT in practice, we need to fill out the information in the payload and encode it with a random key.  This project has created a wrapper function around the jwt.encode function in the example above.
+
+### Using JWTUtils to create a JWT
+
+The purpose of this wrapper class is to make it easier and understand what is necessary to create a JWT.  When we create our JWT, we are going to need to create a Client object, currently defined in jwt_utils.py.  
+
+Once we have the client object, we can created our JWT using the JWTUtils.encodeClientToken function.  You must pass in the client object to this encode function that contains a client "id" and a "secret_key".  The secret key inside of the client object is what replaces the second argument in the jwt.encode function above.
+
+	$ client = Client()
+	$ token = JWTUtils.encodeClientToken( client )
 
 Decoding a payload
 
